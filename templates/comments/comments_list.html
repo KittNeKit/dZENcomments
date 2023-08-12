@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% load static %}
+{% load crispy_forms_filters %}
+{% block content %}
+    <div class="container mt-5">
+        <h1>Comments List</h1>
+        <button class="btn btn-primary btn-sm mb-3" id="showCommentForm">Add Comment</button>
+        <form action="" method="post" class="comment-add" id="commentForm" style="display: none;">
+            {% csrf_token %}
+            <div class="form-group col-md-3">
+              <label for="{{ form.username.id_for_label }}">Username</label>
+              {{ form.username }}
+            </div>
+          <div class="form-group col-md-2">
+            <label for="{{ form.email.id_for_label }}">Email</label>
+            {{ form.email }}
+          </div>
+          <div class="form-group col-md-2">
+            <label for="{{ form.captcha.id_for_label }}">Captcha</label>
+            {{ form.captcha }}
+          </div>
+            <div class="form-group col-md-2">
+                <label for="{{ form.text.id_for_label }}">Comment</label>
+                {{ form.text }}
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm">Add Comment</button>
+        </form>
+    <form action="" method="get">
+        <select class="btn btn-primary" id="order_by" name="order_by">
+          <option value="username">order by</option>
+            <option value="username">Username</option>
+            <option value="email">Email</option>
+            <option value="created_time">Created Time</option>
+        </select>
+       <input type="radio" id="asc" name="order" value="asc" checked>
+        <label for="asc">Ascending</label>
+        <input type="radio" id="desc" name="order" value="desc">
+        <label for="desc">Descending</label>
+        <input class="btn btn-primary" type="submit" value="Sort">
+    </form>
+      <div class="comments-list">
+        {% if comments_list %}
+            {% for comment in comments_list %}
+              {% if not comment.answer_comment %}
+                <hr>
+                  <div class="comment">
+                    <div class="rounded p-2 mb-1 bg-light text-dark content-between">
+                      <img src="{% static 'useravatar.png' %}" class="avatar mr-3" alt="User Avatar">
+                     <b> {{ comment.username }} </b>
+                      {{ comment.created_time |date:"d.m.Y | H:i" }}
+                    </div>
+                    <p>{{ comment.text }}</p>
+                    <button class="btn btn-primary btn-sm reply-btn" data-toggle="collapse" data-target="#replyForm{{ comment.id }}">Reply</button>
+                <div class="nested-comments ml-5">
+                    {% for reply in comment.comments_set.all %}
+                      <hr>
+                    <div class="comment">
+                       <div class="rounded p-2 mb-1 bg-light text-dark content-between">
+                         <img src="{% static 'useravatar.png' %}" class="avatar mr-3" alt="User Avatar">
+                        <b> {{ reply.username }} </b>
+                         {{ reply.created_time |date:"d.m.Y | H:i" }}
+                       </div>
+                      <p>{{ reply.text }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+                <div class="collapse mt-3" id="replyForm{{ comment.id }}">
+                    <form action="" method="post" class="comment-add">
+                      <input type="hidden" name="parent_comment" value="{{ comment.id }}">
+                        {% csrf_token %}
+                        <div class="form-group col-md-3">
+                          <label for="{{ form.username.id_for_label }}">Username</label>
+                          {{ form.username }}
+                        </div>
+                        <div class="form-group col-md-2">
+                          <label for="{{ form.email.id_for_label }}">Email</label>
+                          {{ form.email }}
+                        </div>
+                        <div class="form-group col-md-2">
+                          <label for="{{ form.captcha.id_for_label }}">Captcha</label>
+                          {{ form.captcha }}
+                        </div>
+                        <div class="form-group col-md-2">
+                          <label for="{{ form.text.id_for_label }}">Comment</label>
+                          {{ form.text }}
+                        </div>
+                      <button type="submit" class="btn btn-primary btn-sm">Add Comment</button>
+                    </form>
+                </div>
+              {% endif %}
+            {% endfor %}
+        {% else %}
+        <h2>There are no comments</h2>
+      {% endif %}
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const replyButtons = document.querySelectorAll(".reply-btn");
+            replyButtons.forEach(button => {
+                button.addEventListener("click", () => {
+                    const form = button.parentNode.nextElementSibling;
+                    form.classList.toggle("show");
+                });
+            });
+        });
+    </script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const showCommentFormButton = document.getElementById("showCommentForm");
+        const commentForm = document.getElementById("commentForm");
+
+        showCommentFormButton.addEventListener("click", () => {
+            commentForm.style.display = "block";
+        });
+    });
+</script>
+<script>
+  // Функція для зміни параметра order_by у URL
+  function changeOrderBy(order) {
+    var selectedValue = document.getElementById("orderByDropdown").value;
+
+    // Отримуємо поточний URL
+    var currentUrl = window.location.href;
+
+    // Перевіряємо, чи вже є параметр у URL
+    var separator = currentUrl.includes('?') ? '&' : '?';
+
+    // Видаляємо попередній параметр order_by, якщо він є
+    var updatedUrl = currentUrl.replace(/([?&])order_by=[^&]+(&|$)/, '$1');
+
+    // Додаємо новий параметр order_by та order
+    var newUrl = "?" + separator + 'order_by=' + selectedValue + '&order=' + order;
+
+    // Перезавантажуємо сторінку з новим URL
+    window.location.href = newUrl;
+  }
+</script>
+{% endblock %}
