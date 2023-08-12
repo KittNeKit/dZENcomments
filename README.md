@@ -17,11 +17,11 @@ Service for comments
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/your-username/LunchApp
+git clone https://github.com/your-username/dZENcomments
 ```
 2. Change to the project's directory:
 ```bash
-cd LunchApp
+cd dZENcomments
 ```
 
 3. Once you're in the desired directory, run the following command to create a virtual environment:
