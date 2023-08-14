@@ -5,7 +5,7 @@
     <div class="container mt-5">
         <h1>Comments List</h1>
         <button class="btn btn-primary btn-sm mb-3" id="showCommentForm">Add Comment</button>
-        <form action="" method="post" class="comment-add" id="commentForm" style="display: none;">
+        <form action="" method="post" class="comment-add" id="commentForm" style="display: none;" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="form-group col-md-3">
               <label for="{{ form.username.id_for_label }}">Username</label>
@@ -16,14 +16,27 @@
             {{ form.email }}
           </div>
           <div class="form-group col-md-2">
+            <label for="{{ form.home_page.id_for_label }}">Home page(Optional)</label>
+            {{ form.home_page }}
+          </div>
+          <div class="form-group col-md-2">
             <label for="{{ form.captcha.id_for_label }}">Captcha</label>
             {{ form.captcha }}
           </div>
             <div class="form-group col-md-2">
-                <label for="{{ form.text.id_for_label }}">Comment</label>
-                {{ form.text }}
+              <label for="{{ form.text.id_for_label }}">Comment</label>
+              {{ form.text }}
+              <p>Tags</p>
+              <button class="btn btn-secondary" type="button" id="insertLink">Link</button>
+              <button class="btn btn-secondary" type="button" id="insertCode">Code</button>
+              <button class="btn btn-secondary" type="button" id="insertItalic">Italic</button>
+              <button class="btn btn-secondary" type="button" id="insertBold">Bold</button>
             </div>
-            <button type="submit" class="btn btn-primary btn-sm">Add Comment</button>
+          <div class="form-group col-md-2">
+            <label for="{{ form.file.id_for_label }}">Files</label>
+            {{ form.file }}
+          </div>
+            <button type="submit" class="btn btn-success btn-sm">Add Comment</button>
         </form>
     <form action="" method="get">
         <select class="btn btn-primary" id="order_by" name="order_by">
@@ -49,7 +62,13 @@
                      <b> {{ comment.username }} </b>
                       {{ comment.created_time |date:"d.m.Y | H:i" }}
                     </div>
-                    <p>{{ comment.text }}</p>
+                    {% if comment.home_page %}
+                       <p><a href="{{ comment.home_page }}">home page</a></p>
+                    {% endif %}
+                    <p>{{ comment.text|safe }}</p>
+                  {% if comment.file %}
+                   <p><a href="{{ comment.file }}">Attached file</a></p>
+                  {% endif %}
                     <button class="btn btn-primary btn-sm reply-btn" data-toggle="collapse" data-target="#replyForm{{ comment.id }}">Reply</button>
                 <div class="nested-comments ml-5">
                     {% for reply in comment.comments_set.all %}
@@ -60,13 +79,51 @@
                         <b> {{ reply.username }} </b>
                          {{ reply.created_time |date:"d.m.Y | H:i" }}
                        </div>
-                      <p>{{ reply.text }}</p>
+                      {% if reply.home_page %}
+                       <p><a href="{{ reply.home_page }}">home page</a></p>
+                      {% endif %}
+                      <p>{{ reply.text|safe }}</p>
+                      {% if reply.file %}
+                       <p><a href="{{ reply.file }}">Attached file</a></p>
+                      {% endif %}
+                      <button class="btn btn-primary btn-sm reply-btn" data-toggle="collapse" data-target="#replyForm{{ comment.id }}" data-username="{{ reply.username }}, ">Reply</button>
                     </div>
+                      <div class="collapse mt-3" id="replyForm{{ comment.id }}">
+                        <form action="" method="post" class="comment-add" enctype="multipart/form-data">
+                          <input type="hidden" name="parent_comment" value="{{ comment.id }}">
+                            {% csrf_token %}
+                            <div class="form-group col-md-3">
+                              <label for="{{ form.username.id_for_label }}">Username</label>
+                              {{ form.username }}
+                            </div>
+                            <div class="form-group col-md-2">
+                              <label for="{{ form.email.id_for_label }}">Email</label>
+                              {{ form.email }}
+                            </div>
+                            <div class="form-group col-md-2">
+                              <label for="{{ form.home_page.id_for_label }}">Home page(Optional)</label>
+                              {{ form.home_page }}
+                            </div>
+                            <div class="form-group col-md-2">
+                              <label for="{{ form.captcha.id_for_label }}">Captcha</label>
+                              {{ form.captcha }}
+                            </div>
+                            <div class="form-group col-md-2">
+                              <label for="{{ form.text.id_for_label }}">Comment</label>
+                              {{ form.text }}
+                            </div>
+                          <div class="form-group col-md-2">
+                            <label for="{{ form.file.id_for_label }}">Files</label>
+                            {{ form.file }}
+                          </div>
+                          <button type="submit" class="btn btn-success btn-sm">Add Comment</button>
+                        </form>
+                      </div>
                     {% endfor %}
                 </div>
             </div>
                 <div class="collapse mt-3" id="replyForm{{ comment.id }}">
-                    <form action="" method="post" class="comment-add">
+                    <form action="" method="post" class="comment-add" enctype="multipart/form-data">
                       <input type="hidden" name="parent_comment" value="{{ comment.id }}">
                         {% csrf_token %}
                         <div class="form-group col-md-3">
@@ -78,6 +135,10 @@
                           {{ form.email }}
                         </div>
                         <div class="form-group col-md-2">
+                          <label for="{{ form.home_page.id_for_label }}">Home page(Optional)</label>
+                          {{ form.home_page }}
+                        </div>
+                        <div class="form-group col-md-2">
                           <label for="{{ form.captcha.id_for_label }}">Captcha</label>
                           {{ form.captcha }}
                         </div>
@@ -85,7 +146,11 @@
                           <label for="{{ form.text.id_for_label }}">Comment</label>
                           {{ form.text }}
                         </div>
-                      <button type="submit" class="btn btn-primary btn-sm">Add Comment</button>
+                        <div class="form-group col-md-2">
+                            <label for="{{ form.file.id_for_label }}">Files</label>
+                            {{ form.file }}
+                        </div>
+                      <button type="submit" class="btn btn-success btn-sm">Add Comment</button>
                     </form>
                 </div>
               {% endif %}
@@ -96,19 +161,20 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.min.js"></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const replyButtons = document.querySelectorAll(".reply-btn");
-            replyButtons.forEach(button => {
-                button.addEventListener("click", () => {
-                    const form = button.parentNode.nextElementSibling;
-                    form.classList.toggle("show");
-                });
-            });
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const replyButtons = document.querySelectorAll(".reply-btn");
+    replyButtons.forEach(button => {
+        button.addEventListener("click", () => {
+            const form = button.parentNode.nextElementSibling;
+            const username = button.getAttribute("data-username");
+            form.querySelector("#id_text").value = username;
+            form.classList.toggle("show");
         });
-    </script>
+    });
+});
+</script>
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         const showCommentFormButton = document.getElementById("showCommentForm");
@@ -120,24 +186,60 @@
     });
 </script>
 <script>
-  // Функція для зміни параметра order_by у URL
   function changeOrderBy(order) {
     var selectedValue = document.getElementById("orderByDropdown").value;
 
-    // Отримуємо поточний URL
     var currentUrl = window.location.href;
 
-    // Перевіряємо, чи вже є параметр у URL
     var separator = currentUrl.includes('?') ? '&' : '?';
 
-    // Видаляємо попередній параметр order_by, якщо він є
     var updatedUrl = currentUrl.replace(/([?&])order_by=[^&]+(&|$)/, '$1');
 
-    // Додаємо новий параметр order_by та order
     var newUrl = "?" + separator + 'order_by=' + selectedValue + '&order=' + order;
 
-    // Перезавантажуємо сторінку з новим URL
     window.location.href = newUrl;
   }
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const commentText = document.getElementById("id_text");
+    const insertLinkBtn = document.getElementById("insertLink");
+    const insertCodeBtn = document.getElementById("insertCode");
+    const insertItalicBtn = document.getElementById("insertItalic");
+    const insertBoldBtn = document.getElementById("insertBold");
+
+    insertLinkBtn.addEventListener("click", function() {
+        insertTag(commentText, '<a href="" title=""></a>');
+    });
+
+    insertCodeBtn.addEventListener("click", function() {
+        insertTag(commentText, '<code></code>');
+    });
+
+    insertItalicBtn.addEventListener("click", function() {
+        insertTag(commentText, '<i></i>');
+    });
+
+    insertBoldBtn.addEventListener("click", function() {
+        insertTag(commentText, '<strong></strong>');
+    });
+
+    function insertTag(input, tag) {
+        const start = input.selectionStart;
+        const end = input.selectionEnd;
+        const selectedText = input.value.substring(start, end);
+
+        if (selectedText) {
+            const newText = input.value.slice(0, start) + tag + selectedText + tag + input.value.slice(end);
+            input.value = newText;
+            input.setSelectionRange(start + tag.length, end + tag.length);
+        } else {
+            input.value = input.value.slice(0, start) + tag + input.value.slice(end);
+            input.setSelectionRange(start + tag.length, start + tag.length);
+        }
+
+        input.focus();
+    }
+});
 </script>
 {% endblock %}

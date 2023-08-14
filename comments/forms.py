@@ -9,7 +9,7 @@ class CommentCreate(forms.ModelForm):
 
     class Meta:
         model = Comments
-        fields = ["username", "email", "captcha", "text"]
+        fields = ["username", "email", "home_page", "captcha", "text", "file"]
         labels = {
             "content": "Add new comment",
         }
