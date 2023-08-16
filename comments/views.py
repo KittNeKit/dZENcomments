@@ -1,4 +1,8 @@
 from datetime import datetime
+from io import BytesIO
+
+from PIL import Image
+from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.http import HttpResponseBadRequest
 from django.urls import reverse_lazy
 from django.views import generic
@@ -42,14 +46,26 @@ class CommentsListView(FormMixin, generic.ListView):
         except:
             answer_comment = None
         file = request.FILES.get("file")
-        if file:
-            if file.content_type not in [
-                "image/jpeg",
-                "image/gif",
+
+        if file.content_type.startswith("image"):
+            img = Image.open(file)
+            img.thumbnail((320, 240), Image.ANTIALIAS)
+
+            output_io = BytesIO()
+            img.save(output_io, format="PNG")
+            output_io.seek(0)
+            file = InMemoryUploadedFile(
+                output_io,
+                "ImageField",
+                file.name,
                 "image/png",
-                "text/plain",
-            ]:
-                return HttpResponseBadRequest(content="Bad format for file")
+                len(output_io.getvalue()),
+                None,
+            )
+
+        if file.content_type == "text/plain":
+            if file.size > 10240:
+                return HttpResponseBadRequest("file size too large")
 
         if form.is_valid():
             text = bleach.clean(
@@ -65,7 +81,6 @@ class CommentsListView(FormMixin, generic.ListView):
                 file=file,
                 home_page=request.POST.get("home_page"),
             )
-            print("ok")
             return self.form_valid(form)
 
         return HttpResponseBadRequest(content="Form filed wrong")
