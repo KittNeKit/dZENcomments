@@ -86,11 +86,11 @@
                       {% if reply.file %}
                        <p><a href="{{ reply.file }}">Attached file</a></p>
                       {% endif %}
-                      <button class="btn btn-primary btn-sm reply-btn" data-toggle="collapse" data-target="#replyForm{{ comment.id }}" data-username="{{ reply.username }}, ">Reply</button>
+                      <button class="btn btn-primary btn-sm reply-btn" data-toggle="collapse" data-target="#replyForm{{ reply.id }}" data-username="{{ reply.username }}, ">Reply</button>
                     </div>
-                      <div class="collapse mt-3" id="replyForm{{ comment.id }}">
+                      <div class="collapse mt-3" id="replyForm{{ reply.id }}">
                         <form action="" method="post" class="comment-add" enctype="multipart/form-data">
-                          <input type="hidden" name="parent_comment" value="{{ comment.id }}">
+                          <input type="hidden" name="parent_comment" value="{{ reply.id }}">
                             {% csrf_token %}
                             <div class="form-group col-md-3">
                               <label for="{{ form.username.id_for_label }}">Username</label>
@@ -119,6 +119,56 @@
                           <button type="submit" class="btn btn-success btn-sm">Add Comment</button>
                         </form>
                       </div>
+                      {% for reply_reply in reply.comments_set.all %}
+                        <hr>
+                          <div class="comment ml-5">
+                            <div class="rounded p-2 mb-1 bg-light text-dark content-between">
+                              <img src="{% static 'useravatar.png' %}" class="avatar mr-3" alt="User Avatar">
+                              <b> {{ reply_reply.username }} </b>
+                              {{ reply_reply.created_time |date:"d.m.Y | H:i" }}
+                            </div>
+                            {% if reply_reply.home_page %}
+                              <p><a href="{{ reply_reply.home_page }}">home page</a></p>
+                            {% endif %}
+                            <p>{{ reply_reply.text|safe }}</p>
+                            {% if reply_reply.file %}
+                              <p><a href="{{ reply_reply.file }}">Attached file</a></p>
+                            {% endif %}
+                            <button class="btn btn-primary btn-sm reply-btn" data-toggle="collapse" data-target="#replyForm{{ reply.id }}" data-username="{{ reply_reply.username }}, ">Reply</button>
+                          </div>
+                        <div class="collapse mt-3" id="replyForm{{ reply.id }}">
+                        <form action="" method="post" class="comment-add" enctype="multipart/form-data">
+                          <input type="hidden" name="parent_comment" value="{{ reply.id }}">
+                            {% csrf_token %}
+                            <div class="form-group col-md-3">
+                              <label for="{{ form.username.id_for_label }}">Username</label>
+                              {{ form.username }}
+                            </div>
+                            <div class="form-group col-md-2">
+                              <label for="{{ form.email.id_for_label }}">Email</label>
+                              {{ form.email }}
+                            </div>
+                            <div class="form-group col-md-2">
+                              <label for="{{ form.home_page.id_for_label }}">Home page(Optional)</label>
+                              {{ form.home_page }}
+                            </div>
+                            <div class="form-group col-md-2">
+                              <label for="{{ form.captcha.id_for_label }}">Captcha</label>
+                              {{ form.captcha }}
+                            </div>
+                            <div class="form-group col-md-2">
+                              <label for="{{ form.text.id_for_label }}">Comment</label>
+                              {{ form.text }}
+                            </div>
+                          <div class="form-group col-md-2">
+                            <label for="{{ form.file.id_for_label }}">Files</label>
+                            {{ form.file }}
+                          </div>
+                          <button type="submit" class="btn btn-success btn-sm">Add Comment</button>
+                        </form>
+                      </div>
+
+                        {% endfor %}
                     {% endfor %}
                 </div>
             </div>
