@@ -1,6 +1,7 @@
 import os
 import uuid
 
+from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.utils.text import slugify
 
@@ -26,6 +27,7 @@ class Comments(models.Model):
         upload_to=comment_image_file_path,
         blank=True,
         null=True,
+        validators=[FileExtensionValidator(["JPG", "GIF", "PNG", "TXT"])],
     )
 
     def __str__(self):
